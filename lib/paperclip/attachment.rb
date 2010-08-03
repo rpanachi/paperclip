@@ -71,11 +71,11 @@ module Paperclip
     # #save of its host.  In addition to form uploads, you can also assign
     # another Paperclip attachment:
     #   new_user.avatar = old_user.avatar
-    def assign uploaded_file
+    def assign uploaded_file, style = :original
       ensure_required_accessors!
 
       if uploaded_file.is_a?(Paperclip::Attachment)
-        uploaded_file = uploaded_file.to_file(:original)
+        uploaded_file = uploaded_file.to_file(style)
         close_uploaded_file = uploaded_file.respond_to?(:close)
       end
 
@@ -86,7 +86,7 @@ module Paperclip
 
       return nil if uploaded_file.nil?
 
-      @queued_for_write[:original]   = uploaded_file.to_tempfile
+      @queued_for_write[style]   = uploaded_file.to_tempfile
       instance_write(:file_name,       uploaded_file.original_filename.strip)
       instance_write(:content_type,    uploaded_file.content_type.to_s.strip)
       instance_write(:file_size,       uploaded_file.size.to_i)
@@ -97,7 +97,7 @@ module Paperclip
       post_process
 
       # Reset the file size if the original file was reprocessed.
-      instance_write(:file_size, @queued_for_write[:original].size.to_i)
+      instance_write(:file_size, @queued_for_write[style].size.to_i)
     ensure
       uploaded_file.close if close_uploaded_file
     end

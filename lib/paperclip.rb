@@ -236,8 +236,14 @@ module Paperclip
         (args.length > 0) ? a.to_s(args.first) : a
       end
 
-      define_method "#{name}=" do |file|
-        attachment_for(name).assign(file)
+      define_method "#{name}=" do |files|
+        if files.is_a?(Hash)
+          files.each do |style, file|
+            attachment_for(name).assign(file, style)
+          end
+        else
+          attachment_for(name).assign(files)
+        end
       end
 
       define_method "#{name}?" do
